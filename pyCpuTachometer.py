@@ -22,7 +22,7 @@ GAZ_BUF_SIZE = 10
 
 class Display(QtGui.QLabel):
     def __init__(self, parent = None):
-        self.k_naklona = 0.64
+        self.k_naklona = 0.8
         self.k_scale = 1.0
         QtGui.QLabel.__init__(self, parent)
 #        self.setAttribute(QtCore.Qt.WA_NoSystemBackground)
