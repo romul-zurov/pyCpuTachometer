@@ -12,8 +12,8 @@ from PyQt4 import QtCore, QtGui
 import psutil
 
 
-TACHO_PATH = 'tacho01.png'
-ARROW_PATH = 'arrow01.png'
+TACHO_PATH = 'tacho02.256.png'
+ARROW_PATH = 'arrow02.256.png'
 INTERVAL = 100
 MAX_ANGLE = 252.0
 TACHO_BUF_SIZE = 30 * 100 / INTERVAL
@@ -22,8 +22,7 @@ GAZ_BUF_SIZE = 10
 
 class Display(QtGui.QLabel):
     def __init__(self, parent = None):
-        self.k_naklona = 0.8
-        self.k_scale = 1.0
+        self.k_scale = 1
         QtGui.QLabel.__init__(self, parent)
 #        self.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | 
@@ -31,7 +30,7 @@ class Display(QtGui.QLabel):
         
         self.pixmap = QtGui.QPixmap(TACHO_PATH)
         self.setFixedSize(self.pixmap.width() * self.k_scale,
-                          self.pixmap.height() * self.k_scale * self.k_naklona)
+                          self.pixmap.height() * self.k_scale)
         self.timer = QtCore.QTimer(self)
         self.timer.start(INTERVAL)
         self.connect(self.timer, QtCore.SIGNAL("timeout()"), self.foo)
@@ -59,7 +58,7 @@ class Display(QtGui.QLabel):
     
     def paintEvent(self, eve):
         painter = QtGui.QPainter(self)
-        painter.scale(self.k_scale, self.k_scale * self.k_naklona)
+        painter.scale(self.k_scale, self.k_scale)
         
 #        painter.translate(self.cx_tacho, self.cy_tacho)
         painter.drawPixmap(0, 0, QtGui.QPixmap(TACHO_PATH))
