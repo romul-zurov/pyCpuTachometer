@@ -29,6 +29,7 @@ class Display(QtGui.QLabel):
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | 
                             QtCore.Qt.WindowStaysOnTopHint)
         
+        self.maska_flag = False
         self.set_path()
         self.pixmap = QtGui.QPixmap(self.tacho_path)
         self.set_main_size()
@@ -49,6 +50,10 @@ class Display(QtGui.QLabel):
     def set_path(self):
         self.tacho_path = 'tacho02.' + str(self.main_size) + '.png'
         self.arrow_path = 'arrow02.' + str(self.main_size) + '.png'
+        if self.maska_flag:
+            self.maska_path = 'maska.' + str(self.main_size) + '.png'
+        else:
+            self.maska_path = self.tacho_path
     
     def set_main_size(self):
         self.set_path()
@@ -104,8 +109,8 @@ class Display(QtGui.QLabel):
     def paintEvent(self, eve):
         self.painter = QtGui.QPainter(self)
 #        painter = QtGui.QPainter(self)
-        fon = QtGui.QPixmap(self.tacho_path)
-        self.setMask(fon.mask())
+        maska = QtGui.QPixmap(self.maska_path)
+        self.setMask(maska.mask())
         self.painter.drawPixmap(0, 0, QtGui.QPixmap(self.tacho_path))
         
         self.draw_tacho()
@@ -151,6 +156,9 @@ class Display(QtGui.QLabel):
         if (event.button() == QtCore.Qt.LeftButton):
             self.drag_flag = True
             self.point = event.pos()
+        elif (event.button() == QtCore.Qt.MiddleButton):
+            self.maska_flag = not self.maska_flag
+            self.set_path()
     
     def mouseReleaseEvent(self, event):
         if (event.button() == QtCore.Qt.LeftButton):

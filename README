@@ -1,3 +1,5 @@
 A simple arrow-tachometer-like CPU-load monitor.
 Writen with Python 2.x, PyQt4 and psutils.
+Double-click for resize and wheel-click for pie-hole mask
+
 Roman romul.zurov Zhdanov, romul.zurov@gmail.com
