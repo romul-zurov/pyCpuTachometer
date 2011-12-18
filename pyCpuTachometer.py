@@ -5,8 +5,9 @@
 TODO:
 - paintEvent: delete link to .png files?
 - thread?
-- popUp menu!
+- popUp menu - OK
 - change size on double click - OK
+- no in a taskbar - OK
 '''
 
 
@@ -14,7 +15,7 @@ import sys, math
 from PyQt4 import QtCore, QtGui
 import psutil
 
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 INTERVAL = 100
 MAX_ANGLE = 252.0
 TACHO_BUF_SIZE = 30 * 100 / INTERVAL
@@ -25,9 +26,9 @@ class Display(QtGui.QLabel):
     def __init__(self, parent = None):
         self.main_size = 192
         QtGui.QLabel.__init__(self, parent)
-        self.setAttribute(QtCore.Qt.WA_NoSystemBackground)
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | 
-                            QtCore.Qt.WindowStaysOnTopHint)
+                            QtCore.Qt.WindowStaysOnTopHint | 
+                            QtCore.Qt.X11BypassWindowManagerHint)
         
         self.maska_flag = False
         self.set_path()
@@ -49,8 +50,8 @@ class Display(QtGui.QLabel):
         self.pop_menu = QtGui.QMenu(self)
         self.quit_action = self.pop_menu.addAction("Quit")
         self.connect(self.quit_action, QtCore.SIGNAL("triggered()"), self.close)
-        self.size64_action = self.pop_menu.addAction("About..")
-        self.connect(self.size64_action, QtCore.SIGNAL("triggered()"), self.about)
+        self.about_action = self.pop_menu.addAction("About..")
+        self.connect(self.about_action, QtCore.SIGNAL("triggered()"), self.about)
         self.tray_icon = QtGui.QSystemTrayIcon(QtGui.QIcon(self.tacho_path), self)
         self.tray_icon.show()
         self.tray_icon.setContextMenu(self.pop_menu)
@@ -176,7 +177,7 @@ class Display(QtGui.QLabel):
 
 if __name__ == '__main__':
 #if True:
-    print "Hi!"
+    print VERSION
     app = QtGui.QApplication(sys.argv)
     win = Display()
     win.show()
