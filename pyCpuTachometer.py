@@ -14,7 +14,7 @@ import sys, math
 from PyQt4 import QtCore, QtGui
 import psutil
 
-
+VERSION = "0.4.0"
 INTERVAL = 100
 MAX_ANGLE = 252.0
 TACHO_BUF_SIZE = 30 * 100 / INTERVAL
@@ -42,9 +42,20 @@ class Display(QtGui.QLabel):
         self.gaz_arr = self.zabivka(GAZ_BUF_SIZE, 0.0)
         self.drag_flag = False
         self.MEM = psutil.TOTAL_PHYMEM
-#        self.painter = QtGui.QPainter(self)
+        self.set_menu()
     
     
+    def set_menu(self):
+        self.pop_menu = QtGui.QMenu(self)
+        self.quit_action = self.pop_menu.addAction("Quit")
+        self.connect(self.quit_action, QtCore.SIGNAL("triggered()"), self.close)
+        self.size64_action = self.pop_menu.addAction("About..")
+        self.connect(self.size64_action, QtCore.SIGNAL("triggered()"), self.about)
+        self.tray_icon = QtGui.QSystemTrayIcon(QtGui.QIcon(self.tacho_path), self)
+        self.tray_icon.show()
+        self.tray_icon.setContextMenu(self.pop_menu)
+        self.addAction(self.quit_action)
+        pass
     
     
     def set_path(self):
@@ -55,11 +66,19 @@ class Display(QtGui.QLabel):
         else:
             self.maska_path = self.tacho_path
     
+    
     def set_main_size(self):
         self.set_path()
         self.cx_tacho = self.main_size / 2
         self.cy_tacho = self.main_size / 2
         self.setFixedSize(self.main_size, self.main_size)
+    
+    def about(self):
+        msg_box = QtGui.QMessageBox()
+        msg_box.setText("pyCpuTachometer v. " + VERSION)
+#        msg_box.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        msg_box.exec_()
+        pass
     
     def reset_main_size(self):
         self.main_size = (self.main_size - 64)
@@ -79,24 +98,6 @@ class Display(QtGui.QLabel):
         self.painter.scale(sc, sc)
         self.painter.translate(-cx, -cy)
         self.painter.drawPixmap(0, 0, QtGui.QPixmap(path))
-    
-    def old_draw_gaz(self, painter):
-        pen = QtGui.QPen()
-        pen.setWidth(3)
-        pen.setCapStyle(QtCore.Qt.RoundCap)
-        pen.setColor(QtGui.QColor.fromHsv(100 - self.gaz, 255, 255, 255))
-        painter.setPen(pen)
-        bru = QtGui.QBrush()
-        bru.setStyle(QtCore.Qt.SolidPattern)
-        bru.setColor(QtGui.QColor.fromHsv(100 - self.gaz, 255, 255, 255))
-        painter.setBrush(bru)
-        kr = 3
-        gaz_rect = QtCore.QRect(self.main_size / 2 - (self.main_size / (kr * 2)),
-                                self.main_size / 2 - (self.main_size / (kr * 2)),
-                                self.main_size / kr , self.main_size / kr)
-        gaz_start_angle = -16 * 90
-        painter.drawPie(gaz_rect, gaz_start_angle, self.gaz_angle)
-        pass
     
     def draw_tacho(self):
         self.draw_arrow(self.cx_tacho, self.cy_tacho, self.tacho_angle,
@@ -159,6 +160,8 @@ class Display(QtGui.QLabel):
         elif (event.button() == QtCore.Qt.MiddleButton):
             self.maska_flag = not self.maska_flag
             self.set_path()
+        elif (event.button() == QtCore.Qt.RightButton):
+            self.pop_menu.popup(QtCore.QPoint(event.globalX(), event.globalY()), self.quit_action)
     
     def mouseReleaseEvent(self, event):
         if (event.button() == QtCore.Qt.LeftButton):
@@ -167,11 +170,13 @@ class Display(QtGui.QLabel):
     def mouseDoubleClickEvent (self, event):
         if (event.button() == QtCore.Qt.LeftButton):
             self.reset_main_size()
+    
+
 
 
 if __name__ == '__main__':
+#if True:
     print "Hi!"
-    
     app = QtGui.QApplication(sys.argv)
     win = Display()
     win.show()
