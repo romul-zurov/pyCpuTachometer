@@ -7,7 +7,8 @@ TODO:
 - thread?
 - popUp menu - OK
 - change size on double click - OK
-- no in a taskbar - OK
+- not in a taskbar, in all desktops - OK
+- hide to tray - OK
 '''
 
 
@@ -15,7 +16,7 @@ import sys, math
 from PyQt4 import QtCore, QtGui
 import psutil
 
-VERSION = "0.4.1"
+VERSION = "0.5.0"
 INTERVAL = 100
 MAX_ANGLE = 252.0
 TACHO_BUF_SIZE = 30 * 100 / INTERVAL
@@ -24,11 +25,12 @@ GAZ_BUF_SIZE = 10
 
 class Display(QtGui.QLabel):
     def __init__(self, parent = None):
-        self.main_size = 192
+        self.main_size = 128
         QtGui.QLabel.__init__(self, parent)
+        
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | 
                             QtCore.Qt.WindowStaysOnTopHint | 
-                            QtCore.Qt.X11BypassWindowManagerHint)
+                            QtCore.Qt.X11BypassWindowManagerHint)   
         
         self.maska_flag = False
         self.set_path()
@@ -48,6 +50,8 @@ class Display(QtGui.QLabel):
     
     def set_menu(self):
         self.pop_menu = QtGui.QMenu(self)
+        self.hide_action = self.pop_menu.addAction("Hide/Show")
+        self.connect(self.hide_action, QtCore.SIGNAL("triggered()"), self.hide_or_show)
         self.quit_action = self.pop_menu.addAction("Quit")
         self.connect(self.quit_action, QtCore.SIGNAL("triggered()"), self.close)
         self.about_action = self.pop_menu.addAction("About..")
@@ -55,9 +59,19 @@ class Display(QtGui.QLabel):
         self.tray_icon = QtGui.QSystemTrayIcon(QtGui.QIcon(self.tacho_path), self)
         self.tray_icon.show()
         self.tray_icon.setContextMenu(self.pop_menu)
-        self.addAction(self.quit_action)
-        pass
+        
+        self.tray_icon.activated.connect(self.hide_on_left_click)
     
+    def hide_or_show(self):
+        if self.isHidden():
+            self.show()
+        else:
+            self.hide()
+    
+    def hide_on_left_click(self, value):
+        if (value == QtGui.QSystemTrayIcon.Trigger):
+            self.hide_or_show()
+        pass
     
     def set_path(self):
         self.tacho_path = 'tacho02.' + str(self.main_size) + '.png'
@@ -162,7 +176,7 @@ class Display(QtGui.QLabel):
             self.maska_flag = not self.maska_flag
             self.set_path()
         elif (event.button() == QtCore.Qt.RightButton):
-            self.pop_menu.popup(QtCore.QPoint(event.globalX(), event.globalY()), self.quit_action)
+            self.pop_menu.popup(QtGui.QCursor.pos(), self.quit_action)
     
     def mouseReleaseEvent(self, event):
         if (event.button() == QtCore.Qt.LeftButton):
