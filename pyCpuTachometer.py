@@ -16,7 +16,7 @@ import sys, math
 from PyQt4 import QtCore, QtGui
 import psutil
 
-VERSION = "0.5.0"
+VERSION = "0.5.2"
 INTERVAL = 100
 MAX_ANGLE = 252.0
 TACHO_BUF_SIZE = 30 * 100 / INTERVAL
