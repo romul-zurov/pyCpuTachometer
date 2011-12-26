@@ -3,7 +3,7 @@
 
 '''
 TODO:
-- paintEvent: delete link to .png files?
+- paintEvent: delete link to .png files? - OK
 - thread?
 - popUp menu - OK
 - change size on double click - OK
@@ -16,7 +16,7 @@ import sys, math
 from PyQt4 import QtCore, QtGui
 import psutil
 
-VERSION = "0.5.2"
+VERSION = "0.6.0"
 INTERVAL = 100
 MAX_ANGLE = 252.0
 TACHO_BUF_SIZE = 30 * 100 / INTERVAL
@@ -80,6 +80,11 @@ class Display(QtGui.QLabel):
             self.maska_path = 'maska.' + str(self.main_size) + '.png'
         else:
             self.maska_path = self.tacho_path
+        
+        self.tacho_pixmap = QtGui.QPixmap(self.tacho_path)
+        self.arrow_pixmap = QtGui.QPixmap(self.arrow_path)
+        self.maska_pixmap = QtGui.QPixmap(self.maska_path)
+        pass
     
     
     def set_main_size(self):
@@ -91,14 +96,13 @@ class Display(QtGui.QLabel):
     def about(self):
         msg_box = QtGui.QMessageBox()
         msg_box.setText("pyCpuTachometer v. " + VERSION)
-#        msg_box.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         msg_box.exec_()
         pass
     
     def reset_main_size(self):
-        self.main_size = (self.main_size - 64)
-        if self.main_size < 64:
-            self.main_size = 256
+        if self.main_size <= 64 : self.main_size = 256
+        elif self.main_size > 128 : self.main_size -= 64
+        else: self.main_size -= 32
         self.set_main_size()
     
     def zabivka(self, size, val):
@@ -107,27 +111,25 @@ class Display(QtGui.QLabel):
             ss.append(val)
         return ss
     
-    def draw_arrow(self, cx, cy, angle, sc, path):
+    def draw_arrow(self, cx, cy, angle, sc, pixmap):
         self.painter.translate(cx, cy)
         self.painter.rotate(angle)
         self.painter.scale(sc, sc)
         self.painter.translate(-cx, -cy)
-        self.painter.drawPixmap(0, 0, QtGui.QPixmap(path))
+        self.painter.drawPixmap(0, 0, pixmap)
     
     def draw_tacho(self):
         self.draw_arrow(self.cx_tacho, self.cy_tacho, self.tacho_angle,
-                        1.0, self.arrow_path)
+                        1.0, self.arrow_pixmap)
     
     def draw_gaz(self):
         self.draw_arrow(self.cx_tacho, self.cy_tacho, self.gaz_angle,
-                        0.64, self.arrow_path)
+                        0.64, self.arrow_pixmap)
     
     def paintEvent(self, eve):
         self.painter = QtGui.QPainter(self)
-#        painter = QtGui.QPainter(self)
-        maska = QtGui.QPixmap(self.maska_path)
-        self.setMask(maska.mask())
-        self.painter.drawPixmap(0, 0, QtGui.QPixmap(self.tacho_path))
+        self.setMask(self.maska_pixmap.mask())
+        self.painter.drawPixmap(0, 0, self.tacho_pixmap)
         
         self.draw_tacho()
         self.painter.resetTransform()
